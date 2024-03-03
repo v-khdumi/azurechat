@@ -29,14 +29,12 @@ export const LogIn: FC<LoginProps> = ({ isDevMode }) => {
           Login with your Personal Account or Microsoft 365 account
         </CardDescription>
       </CardHeader>
-      <Card className="flex gap-2 flex-col min-w-[300px]">
-        {/* Conținutul CardHeader */}
-        <CardContent className="grid gap-4">
-          <Button onClick={() => signIn("azure-ad-b2c")}>Personal Account</Button>
-          <Button onClick={() => signIn("azure-ad")}>Microsoft 365</Button>
-          {isDevMode && (
-            <Button onClick={() => signIn("credentials")}>
-              Basic Auth (DEV ONLY)
+      <CardContent className="grid gap-4">
+        <Button onClick={() => signIn("azure-ad-b2c")}>Personal Account</Button>
+        <Button onClick={() => signIn("azure-ad")}>Microsoft 365</Button>
+        {isDevMode && (
+          <Button onClick={() => signIn("credentials")}>
+            Basic Auth (DEV ONLY)
           </Button>
         )}
       </CardContent>
