@@ -1,17 +1,15 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
+import { Provider } from "next-auth/providers";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
-import { Provider } from "next-auth/providers/index";
-import { hashValue } from "./helpers";
 import AzureADB2CProvider from "next-auth/providers/azure-ad-b2c";
+import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { hashValue } from "./helpers";
 
 const configureIdentityProvider = () => {
   const providers: Array<Provider> = [];
 
-  const adminEmails = process.env.ADMIN_EMAIL_ADDRESS?.split(",").map((email) =>
-    email.toLowerCase().trim()
-  );
+  const adminEmails = process.env.ADMIN_EMAIL_ADDRESS?.split(",").map(email => email.toLowerCase().trim());
 
   if (process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET) {
     providers.push(
@@ -21,10 +19,10 @@ const configureIdentityProvider = () => {
         async profile(profile) {
           const newProfile = {
             ...profile,
-            isAdmin: adminEmails?.includes(profile.email.toLowerCase()),
-          };
+            isAdmin: adminEmails?.includes(profile.email.toLowerCase())
+          }
           return newProfile;
-        },
+        }
       })
     );
   }
@@ -40,27 +38,6 @@ const configureIdentityProvider = () => {
         clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
         tenantId: process.env.AZURE_AD_TENANT_ID!,
         async profile(profile) {
-          const newProfile = {
-            ...profile,
-            // throws error without this - unsure of the root cause (https://stackoverflow.com/questions/76244244/profile-id-is-missing-in-google-oauth-profile-response-nextauth)
-            id: profile.sub,
-            isAdmin:
-              adminEmails?.includes(profile.email.toLowerCase()) ||
-              adminEmails?.includes(profile.preferred_username.toLowerCase()),
-          };
-          return newProfile;
-        },
-      })
-    );
-  }
-    if(process.env.AUTH_CLIENT_ID && process.env.AUTH_CLIENT_SECRET && process.env.AUTH_TENANT_NAME && process.env.AUTH_TENANT_GUID && process.env.USER_FLOW) {
-    providers.push(
-      AzureADB2CProvider({tenantId: process.env.AUTH_TENANT_GUID,
-        clientId: process.env.AUTH_CLIENT_ID,
-        clientSecret: process.env.AUTH_CLIENT_SECRET,
-        primaryUserFlow: process.env.USER_FLOW,
-        authorization: { params: { scope: `https://${process.env.AUTH_TENANT_NAME}.onmicrosoft.com/api/demo.read https://${process.env.AUTH_TENANT_NAME}.onmicrosoft.com/api/demo.write offline_access openid` } },
-        async profile(profile) {
 
           const newProfile = {
             ...profile,
@@ -70,9 +47,32 @@ const configureIdentityProvider = () => {
           }
           return newProfile;
         }
+      })
+    );
+  }
+
+  if(process.env.AUTH_CLIENT_ID && process.env.AUTH_CLIENT_SECRET && process.env.AUTH_TENANT_NAME && process.env.AUTH_TENANT_GUID && process.env.USER_FLOW) {
+    providers.push(
+      AzureADB2CProvider({tenantId: process.env.AUTH_TENANT_NAME!,
+        clientId: process.env.AUTH_CLIENT_ID!,
+        clientSecret: process.env.AUTH_CLIENT_SECRET!,
+        primaryUserFlow: process.env.USER_FLOW!,
+        authorization: { params: { scope: "offline_access openid" } },
+        async profile(profile) {
+          
+          const newProfile = {
+            ...profile,
+            // throws error without this - unsure of the root cause (https://stackoverflow.com/questions/76244244/profile-id-is-missing-in-google-oauth-profile-response-nextauth)
+            id: profile.sub,
+            email: profile.emails[0],
+            isAdmin: adminEmails?.includes(profile.emails[0].toLowerCase())
+          }
+          return newProfile;
+        }
     })
     )
   }
+
 
 
   // If we're in local dev, add a basic credential provider option as well
@@ -86,7 +86,7 @@ const configureIdentityProvider = () => {
         credentials: {
           username: { label: "Username", type: "text", placeholder: "dev" },
           password: { label: "Password", type: "password" },
-        },
+        },    
         async authorize(credentials, req): Promise<any> {
           // You can put logic here to validate the credentials and return a user.
           // We're going to take any username and make a new user with it
@@ -94,18 +94,15 @@ const configureIdentityProvider = () => {
           const username = credentials?.username || "dev";
           const email = username + "@localhost";
           const user = {
-            id: hashValue(email),
-            name: username,
-            email: email,
-            isAdmin: false,
-            image: "",
-          };
-          console.log(
-            "=== DEV USER LOGGED IN:\n",
-            JSON.stringify(user, null, 2)
-          );
+              id: hashValue(email),
+              name: username,
+              email: email,
+              isAdmin: false,
+              image: "",
+            };
+          console.log("=== DEV USER LOGGED IN:\n", JSON.stringify(user, null, 2));
           return user;
-        },
+        }
       })
     );
   }
@@ -116,17 +113,17 @@ const configureIdentityProvider = () => {
 export const options: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [...configureIdentityProvider()],
-  callbacks: {
-    async jwt({ token, user }) {
+    callbacks: {
+    async jwt({token, user, account, profile, isNewUser, session}) {
       if (user?.isAdmin) {
-        token.isAdmin = user.isAdmin;
+       token.isAdmin = user.isAdmin
       }
-      return token;
+      return token
     },
-    async session({ session, token, user }) {
-      session.user.isAdmin = token.isAdmin as boolean;
-      return session;
-    },
+    async session({session, token, user }) {
+      session.user.isAdmin = token.isAdmin as string
+      return session
+    }
   },
   session: {
     strategy: "jwt",
