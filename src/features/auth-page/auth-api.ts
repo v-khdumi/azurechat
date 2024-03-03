@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { Provider } from "next-auth/providers/index";
 import { hashValue } from "./helpers";
+import AzureADB2CProvider from "next-auth/providers/azure-ad-b2c";
 
 const configureIdentityProvider = () => {
   const providers: Array<Provider> = [];
@@ -52,6 +53,27 @@ const configureIdentityProvider = () => {
       })
     );
   }
+    if(process.env.AUTH_CLIENT_ID && process.env.AUTH_CLIENT_SECRET && process.env.AUTH_TENANT_NAME && process.env.AUTH_TENANT_GUID && process.env.USER_FLOW) {
+    providers.push(
+      AzureADB2CProvider({tenantId: process.env.AUTH_TENANT_GUID,
+        clientId: process.env.AUTH_CLIENT_ID,
+        clientSecret: process.env.AUTH_CLIENT_SECRET,
+        primaryUserFlow: process.env.USER_FLOW,
+        authorization: { params: { scope: `https://${process.env.AUTH_TENANT_NAME}.onmicrosoft.com/api/demo.read https://${process.env.AUTH_TENANT_NAME}.onmicrosoft.com/api/demo.write offline_access openid` } },
+        async profile(profile) {
+
+          const newProfile = {
+            ...profile,
+            // throws error without this - unsure of the root cause (https://stackoverflow.com/questions/76244244/profile-id-is-missing-in-google-oauth-profile-response-nextauth)
+            id: profile.sub,
+            isAdmin: adminEmails?.includes(profile.email.toLowerCase()) || adminEmails?.includes(profile.preferred_username.toLowerCase())
+          }
+          return newProfile;
+        }
+    })
+    )
+  }
+
 
   // If we're in local dev, add a basic credential provider option as well
   // (Useful when a dev doesn't have access to create app registration in their tenant)
