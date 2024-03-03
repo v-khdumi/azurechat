@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { options } from "./auth-api";
 import { RedirectToPage } from "../common/navigation-helpers";
 
+
 // Definiția tipului pentru modelul de utilizator
 export type UserModel = {
   name: string;
