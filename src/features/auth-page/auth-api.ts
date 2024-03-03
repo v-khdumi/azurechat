@@ -1,8 +1,8 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import { Provider } from "next-auth/providers";
+import NextAuth from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import AzureADB2CProvider from "next-auth/providers/azure-ad-b2c";
-import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { hashValue } from "./helpers";
 
