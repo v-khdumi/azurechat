@@ -24,6 +24,11 @@ const azureEnvVars = [
   "AZURE_SPEECH_REGION",
   "AZURE_SPEECH_KEY",
   "AZURE_KEY_VAULT_NAME",
+  "AUTH_CLIENT_ID",
+  "AUTH_CLIENT_SECRET",
+  "AUTH_TENANT_NAME",
+  "AUTH_TENANT_GUID",
+  "USER_FLOW",
 ] as const;
 
 type RequiredServerEnvKeys = (typeof azureEnvVars)[number];
