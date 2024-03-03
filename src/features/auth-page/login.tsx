@@ -23,18 +23,20 @@ export const LogIn: FC<LoginProps> = ({ isDevMode }) => {
           <Avatar className="h-8 w-8">
             <AvatarImage src={"ai-icon.png"} alt="AI Icon" />
           </Avatar>
-          <span className="text-primary">Your App Name</span> {/* Utilizează AI_NAME dacă este definit */}
+          <span className="text-primary">AnyAsk</span> {/* Utilizează AI_NAME dacă este definit */}
         </CardTitle>
         <CardDescription>
           Login with your Personal Account or Microsoft 365 account
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <Button onClick={() => signIn("azure-ad-b2c")}>Personal Account</Button>
-        <Button onClick={() => signIn("azure-ad")}>Microsoft 365</Button>
-        {isDevMode && (
-          <Button onClick={() => signIn("credentials")}>
-            Basic Auth (DEV ONLY)
+      <Card className="flex gap-2 flex-col min-w-[300px]">
+        {/* Conținutul CardHeader */}
+        <CardContent className="grid gap-4">
+          <Button onClick={() => signIn("azure-ad-b2c")}>Personal Account</Button>
+          <Button onClick={() => signIn("azure-ad")}>Microsoft 365</Button>
+          {isDevMode && (
+            <Button onClick={() => signIn("credentials")}>
+              Basic Auth (DEV ONLY)
           </Button>
         )}
       </CardContent>
