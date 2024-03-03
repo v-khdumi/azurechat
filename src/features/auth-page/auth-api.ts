@@ -1,118 +1,88 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
-import { Provider } from "next-auth/providers";
-import NextAuth from "next-auth";
+// Asigură-te că importurile sunt actualizate conform versiunii `next-auth`
 import AzureADProvider from "next-auth/providers/azure-ad";
 import AzureADB2CProvider from "next-auth/providers/azure-ad-b2c";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { hashValue } from "./helpers";
 
-const configureIdentityProvider = () => {
-  const providers: Array<Provider> = [];
+// Definește furnizorii de identitate
+const providers = [];
 
-  const adminEmails = process.env.ADMIN_EMAIL_ADDRESS?.split(",").map(email => email.toLowerCase().trim());
-
-
-  if (
-    process.env.AZURE_AD_CLIENT_ID &&
-    process.env.AZURE_AD_CLIENT_SECRET &&
-    process.env.AZURE_AD_TENANT_ID
-  ) {
-    providers.push(
-      AzureADProvider({
-        clientId: process.env.AZURE_AD_CLIENT_ID!,
-        clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
-        tenantId: process.env.AZURE_AD_TENANT_ID!,
-        async profile(profile) {
-
-          const newProfile = {
-            ...profile,
-            // throws error without this - unsure of the root cause (https://stackoverflow.com/questions/76244244/profile-id-is-missing-in-google-oauth-profile-response-nextauth)
-            id: profile.sub,
-            isAdmin: adminEmails?.includes(profile.email.toLowerCase()) || adminEmails?.includes(profile.preferred_username.toLowerCase())
-          }
-          return newProfile;
-        }
-      })
-    );
-  }
-
-  if(process.env.AUTH_CLIENT_ID && process.env.AUTH_CLIENT_SECRET && process.env.AUTH_TENANT_NAME && process.env.AUTH_TENANT_GUID && process.env.USER_FLOW) {
-    providers.push(
-      AzureADB2CProvider({tenantId: process.env.AUTH_TENANT_NAME!,
-        clientId: process.env.AUTH_CLIENT_ID!,
-        clientSecret: process.env.AUTH_CLIENT_SECRET!,
-        primaryUserFlow: process.env.USER_FLOW!,
-        authorization: { params: { scope: "offline_access openid" } },
-        async profile(profile) {
-          
-          const newProfile = {
-            ...profile,
-            // throws error without this - unsure of the root cause (https://stackoverflow.com/questions/76244244/profile-id-is-missing-in-google-oauth-profile-response-nextauth)
-            id: profile.sub,
-            email: profile.emails[0],
-            isAdmin: adminEmails?.includes(profile.emails[0].toLowerCase())
-          }
-          return newProfile;
-        }
+// Configurație pentru Azure AD (Microsoft 365)
+if (
+  process.env.AZURE_AD_CLIENT_ID &&
+  process.env.AZURE_AD_CLIENT_SECRET &&
+  process.env.AZURE_AD_TENANT_ID
+) {
+  providers.push(
+    AzureADProvider({
+      clientId: process.env.AZURE_AD_CLIENT_ID,
+      clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
+      tenantId: process.env.AZURE_AD_TENANT_ID,
+      authorization: { params: { scope: "openid email profile" } },
     })
-    )
-  }
+  );
+}
 
+// Configurație pentru Azure AD B2C (Personal Account)
+if (
+  process.env.AZURE_AD_B2C_CLIENT_ID &&
+  process.env.AZURE_AD_B2C_CLIENT_SECRET &&
+  process.env.AZURE_AD_B2C_TENANT_NAME &&
+  process.env.AZURE_AD_B2C_PRIMARY_USER_FLOW
+) {
+  providers.push(
+    AzureADB2CProvider({
+      clientId: process.env.AZURE_AD_B2C_CLIENT_ID,
+      clientSecret: process.env.AZURE_AD_B2C_CLIENT_SECRET,
+      tenantId: process.env.AZURE_AD_B2C_TENANT_NAME,
+      primaryUserFlow: process.env.AZURE_AD_B2C_PRIMARY_USER_FLOW,
+      authorization: { params: { scope: "openid email profile" } },
+    })
+  );
+}
 
-
-  // If we're in local dev, add a basic credential provider option as well
-  // (Useful when a dev doesn't have access to create app registration in their tenant)
-  // This currently takes any username and makes a user with it, ignores password
-  // Refer to: https://next-auth.js.org/configuration/providers/credentials
-  if (process.env.NODE_ENV === "development") {
-    providers.push(
-      CredentialsProvider({
-        name: "localdev",
-        credentials: {
-          username: { label: "Username", type: "text", placeholder: "dev" },
-          password: { label: "Password", type: "password" },
-        },    
-        async authorize(credentials, req): Promise<any> {
-          // You can put logic here to validate the credentials and return a user.
-          // We're going to take any username and make a new user with it
-          // Create the id as the hash of the email as per userHashedId (helpers.ts)
-          const username = credentials?.username || "dev";
-          const email = username + "@localhost";
-          const user = {
-              id: hashValue(email),
-              name: username,
-              email: email,
-              isAdmin: false,
-              image: "",
-            };
-          console.log("=== DEV USER LOGGED IN:\n", JSON.stringify(user, null, 2));
-          return user;
+// Opțional: Configurație pentru autentificare locală în mod dezvoltare
+if (process.env.NODE_ENV === "development") {
+  providers.push(
+    CredentialsProvider({
+      // Configurația pentru providerul de credențiale (exemplu simplificat)
+      name: "Credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        // Aici ar trebui implementată logica de validare a credențialelor
+        // Exemplu: returnează user-ul dacă credențialele sunt valide
+        if (credentials.username === "admin" && credentials.password === "admin") {
+          return { id: 1, name: "Admin" };
         }
-      })
-    );
-  }
+        // Returnează null dacă autentificarea eșuează
+        return null;
+      },
+    })
+  );
+}
 
-  return providers;
-};
-
-export const options: NextAuthOptions = {
+const options: NextAuthOptions = {
+  providers,
   secret: process.env.NEXTAUTH_SECRET,
-  providers: [...configureIdentityProvider()],
-    callbacks: {
-    async jwt({token, user, account, profile, isNewUser, session}) {
+  callbacks: {
+    async jwt({ token, user }) {
       if (user?.isAdmin) {
-       token.isAdmin = user.isAdmin
+        token.isAdmin = user.isAdmin;
       }
-      return token
+      return token;
     },
-    async session({session, token, user }) {
-      session.user.isAdmin = token.isAdmin as string
-      return session
-    }
+    async session({ session, token }) {
+      if (token.isAdmin) {
+        session.user.isAdmin = token.isAdmin;
+      }
+      return session;
+    },
   },
-  session: {
-    strategy: "jwt",
-  },
+  // Configurații suplimentare după necesitate
 };
 
-export const handlers = NextAuth(options);
+export default NextAuth(options);
