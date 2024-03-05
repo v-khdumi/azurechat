@@ -14,7 +14,6 @@ module.exports = {
     },
     extend: {
       colors: {
-        brand: "hsl(var(--brand))", // adăugat din primul fișier
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -33,20 +32,20 @@ module.exports = {
           foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))", // adăugat din primul fișier
-          foreground: "hsl(var(--muted-foreground))", // adăugat din primul fișier
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))", // adăugat din primul fișier
-          foreground: "hsl(var(--accent-foreground))", // adăugat din primul fișier
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))", // adăugat din primul fișier
-          foreground: "hsl(var(--popover-foreground))", // adăugat din primul fișier
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: "hsl(var(--card))", // adăugat din primul fișier
-          foreground: "hsl(var(--card-foreground))", // adăugat din primul fișier
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
         },
       },
       borderRadius: {
