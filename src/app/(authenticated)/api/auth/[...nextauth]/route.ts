@@ -1,5 +1,3 @@
-// pages/api/auth/[...nextauth].ts
-import NextAuth from "next-auth";
-import { options } from "@/features/auth-page/auth-api"; // Asigură-te că calea este corectă
+import { handlers } from "@/features/auth-page/auth-api";
 
-export default (req, res) => NextAuth(req, res, options);
+export { handlers as GET, handlers as POST };
