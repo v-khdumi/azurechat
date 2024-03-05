@@ -14,15 +14,18 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Se presupune că restul variabilelor de culori sunt definite în altă parte în CSS
+        primary: {
+          DEFAULT: "hsl(136, 80%, 29%)", // Culoarea verde nouă pentru modul luminos
+          // Presupunem că aveți o culoare de contrast definită pentru foreground (text) care merge bine cu verdele
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        // Restul culorilor neschimbate
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
