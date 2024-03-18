@@ -1,5 +1,5 @@
-export const AI_NAME = "AnyAsk";
-export const AI_DESCRIPTION = "AnyAsk is a friendly AI assistant.";
+export const AI_NAME = "AzureChat";
+export const AI_DESCRIPTION = "AzureChat is a friendly AI assistant.";
 export const CHAT_DEFAULT_PERSONA = AI_NAME + " default";
 
 export const CHAT_DEFAULT_SYSTEM_PROMPT = `You are a friendly ${AI_NAME} AI assistant. You must always return in markdown format.
