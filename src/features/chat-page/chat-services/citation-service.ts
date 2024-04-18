@@ -117,6 +117,3 @@ export const FormatCitations = (citation: any[]) => {
 
   return withoutEmbedding;
 };
-
-  return withoutEmbedding;
-};
