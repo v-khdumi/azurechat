@@ -39,6 +39,8 @@ export const ChatInput = () => {
   const { isMicrophoneReady } = useSpeechToText();
   const { rows } = useChatInputDynamicHeight();
 
+  import { IndexDocuments } from "./azure-ai-search";
+
   const submitButton = React.useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
