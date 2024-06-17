@@ -1,5 +1,6 @@
 import { ExtensionSimilaritySearch } from "../azure-ai-search/azure-ai-search";
 import { CreateCitations, FormatCitations } from "../citation-service";
+import { IndexDocuments } from "./azure-ai-search";
 
 export const SearchAzureAISimilarDocuments = async (req: Request) => {
   try {
