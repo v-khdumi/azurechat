@@ -1,6 +1,7 @@
 import { Paperclip } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "../../button";
+import { IndexDocuments } from "./azure-ai-search";
 
 export const AttachFile = (props: {
   onClick: (formData: FormData) => void;
